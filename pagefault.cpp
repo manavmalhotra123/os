@@ -2,40 +2,48 @@
 // No of frames - 3
 // Request list - 1 2 3 4 1 2 5 1 2 3 4 5
 
-#include <iostream>
-#include <queue>
+#include<iostream>
+#include<queue>
 
 using namespace std;
 
-int main() {
-    int frames, requests;
-    cout << "Enter the no of frames: ";
-    cin >> frames;
-    cout << "Enter the no of requests: ";
-    cin >> requests;
+int main()
+{
+   int frames;
+   int requests;
+   cout<<"Enter the number of frames"<<endl;
+   cin >> frames;
+   cout<<"Enter the number of request"<<endl;
+   cin >> requests;
 
-    int page_faults = 0;
-    queue<int> q;
+   int faults = 0;
+   queue<int> q;
 
-    cout<<"Enter the requests: ";
-    for (int i = 0; i < requests; i++) {
-        int request;
-        cin >> request;
-        bool found = false;
-        for (int j = 0; j < q.size(); j++) {
-            if (q.front() == request) {
-                found = true;
-                break;
-            }
-            q.push(q.front());
+   cout<<"Enter the requests " << endl;
+   for ( int i = 0; i < requests; i++ )
+   {
+    int request;
+    cin >> request;
+    bool found = false;
+    for ( int j = 0; j < q.size(); j++ ){
+        if (q.front() == request){
+            found = true;
+            break;
+        }
+        q.push(q.front());
+        q.pop();
+    }
+    if (!found)
+    {
+        if (q.size() == frames){
             q.pop();
         }
-        if (!found) {
-            if (q.size() == frames) {
-                q.pop();
-            }
-            q.push(request);
-            page_faults++;
-        }
+        q.push(request);
+        faults++;
     }
+   }
+
+   cout<<"Number of faults are : "<<faults<<endl;
+
+   return 0;
 }
