@@ -1,91 +1,123 @@
-// all types of algorithm - first fit , best fit and worst fit
-
-
 #include <iostream>
-#include <limits.h>
+#include <iomanip>
 
 using namespace std;
 
-// Function to find the best fit block
-int bestFit(int freeList[], int n, int requestSize) {
-    int bestBlock = -1;
+const int MAX = 100;
+
+class MemoryBlock {
+public:
+    int size;
+    bool allocated;
+};
+
+void printMemoryBlocks(MemoryBlock memoryBlocks[], int n) {
+    cout << left << setw(10) << "Block ID" << setw(20) << "Block Size" << setw(20) << "Allocated" << endl;
     for (int i = 0; i < n; i++) {
-        if (freeList[i] >= requestSize && (bestBlock == -1 || freeList[i] < freeList[bestBlock])) {
-            bestBlock = i;
-        }
+        cout << left << setw(10) << i + 1 << setw(20) << memoryBlocks[i].size << setw(20) << (memoryBlocks[i].allocated ? "Yes" : "No") << endl;
     }
-    return bestBlock;
+    cout << "--------------------------------------------------------------------" << endl;
 }
 
-// Function to find the first fit block
-int firstFit(int freeList[], int n, int requestSize) {
+void bestFit(MemoryBlock memoryBlocks[], int n, int processSize) {
+    int bestFitIndex = -1;
+    int bestFitSize = MAX;
+
     for (int i = 0; i < n; i++) {
-        if (freeList[i] >= requestSize) {
-            return i;
+        if (!memoryBlocks[i].allocated && memoryBlocks[i].size >= processSize && memoryBlocks[i].size < bestFitSize) {
+            bestFitIndex = i;
+            bestFitSize = memoryBlocks[i].size;
         }
     }
-    return -1;
+
+    if (bestFitIndex != -1) {
+        memoryBlocks[bestFitIndex].allocated = true;
+        cout << "Process allocated to block " << bestFitIndex + 1 << endl;
+    }
+    else {
+        cout << "No block available for allocation" << endl;
+    }
 }
 
-// Function to find the worst fit block
-int worstFit(int freeList[], int n, int requestSize) {
-    int worstBlock = -1;
+void worstFit(MemoryBlock memoryBlocks[], int n, int processSize) {
+    int worstFitIndex = -1;
+    int worstFitSize = 0;
+
     for (int i = 0; i < n; i++) {
-        if (freeList[i] >= requestSize && (worstBlock == -1 || freeList[i] > freeList[worstBlock])) {
-            worstBlock = i;
+        if (!memoryBlocks[i].allocated && memoryBlocks[i].size >= processSize && memoryBlocks[i].size > worstFitSize) {
+            worstFitIndex = i;
+            worstFitSize = memoryBlocks[i].size;
         }
     }
-    return worstBlock;
+
+    if (worstFitIndex != -1) {
+        memoryBlocks[worstFitIndex].allocated = true;
+        cout << "Process allocated to block " << worstFitIndex + 1 << endl;
+    }
+    else {
+        cout << "No block available for allocation" << endl;
+    }
+}
+
+void firstFit(MemoryBlock memoryBlocks[], int n, int processSize) {
+    for (int i = 0; i < n; i++) {
+        if (!memoryBlocks[i].allocated && memoryBlocks[i].size >= processSize) {
+            memoryBlocks[i].allocated = true;
+            cout << "Process allocated to block " << i + 1 << endl;
+            return;
+        }
+    }
+    cout << "No block available for allocation" << endl;
 }
 
 int main() {
-    // Create a free list
-    int freeList[] = {100, 50, 200, 75, 300};
-    int n = sizeof(freeList) / sizeof(freeList[0]);
+    MemoryBlock memoryBlocks[MAX];
+    int n, processSize;
 
-    // Print the free list
-    cout << "Free list: ";
+    cout << "Enter the number of memory blocks: ";
+    cin >> n;
+
     for (int i = 0; i < n; i++) {
-        cout << freeList[i] << " ";
-    }
-    cout << endl;
-
-    // Allocate some blocks using best fit
-    int requestSize = 80;
-    int bestBlock = bestFit(freeList, n, requestSize);
-    if (bestBlock != -1) {
-        cout << "Allocated " << requestSize << " bytes using best fit at position " << bestBlock << endl;
-        freeList[bestBlock] -= requestSize;
-    } else {
-        cout << "Unable to allocate " << requestSize << " bytes using best fit" << endl;
+        cout << "Enter the size of block " << i + 1 << ": ";
+        cin >> memoryBlocks[i].size;
+        memoryBlocks[i].allocated = false;
     }
 
-    // Allocate some blocks using first fit
-    requestSize = 100;
-    int firstBlock = firstFit(freeList, n, requestSize);
-    if (firstBlock != -1) {
-        cout << "Allocated " << requestSize << " bytes using first fit at position " << firstBlock << endl;
-        freeList[firstBlock] -= requestSize;
-    } else {
-        cout << "Unable to allocate " << requestSize << " bytes using first fit" << endl;
-    }
+    printMemoryBlocks(memoryBlocks, n);
 
-    // Allocate some blocks using worst fit
-    requestSize = 150;
-    int worstBlock = worstFit(freeList, n, requestSize);
-    if (worstBlock != -1) {
-        cout << "Allocated " << requestSize << " bytes using worst fit at position " << worstBlock << endl;
-        freeList[worstBlock] -= requestSize;
-    } else {
-        cout << "Unable to allocate " << requestSize << " bytes using worst fit" << endl;
-    }
+    while (true) {
+        cout << "Enter the size of the process (-1 to exit): ";
+        cin >> processSize;
 
-    // Print the updated free list
-    cout << "Updated free list: ";
-    for (int i = 0; i < n; i++) {
-        cout << freeList[i] << " ";
+        if (processSize == -1) {
+            break;
+        }
+
+        cout << "Select the memory allocation algorithm:" << endl;
+        cout << "1. Best Fit" << endl;
+        cout << "2. Worst Fit" << endl;
+        cout << "3. First Fit" << endl;
+
+        int choice;
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            bestFit(memoryBlocks, n, processSize);
+            break;
+        case 2:
+            worstFit(memoryBlocks, n, processSize);
+            break;
+        case 3:
+            firstFit(memoryBlocks, n, processSize);
+            break;
+        default:
+            cout << "Invalid choice" << endl;
+            break;
+        }
+
+        printMemoryBlocks(memoryBlocks, n);
     }
-    cout << endl;
 
     return 0;
 }
